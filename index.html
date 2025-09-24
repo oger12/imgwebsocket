@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Sharing App</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+  <h1>Image Sharing App</h1>
+
+  <form id="uploadForm">
+    <input type="file" name="image" accept="image/*" />
+    <button type="submit">Upload</button>
+  </form>
+
+  <div id="gallery"></div>
+
+  <script>
+    const socket = io("http://localhost:3500");
+    const form = document.getElementById("uploadForm");
+    const gallery = document.getElementById("gallery");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fileInput = form.querySelector("input[type=file]");
+      const formData = new FormData();
+      formData.append("image", fileInput.files[0]);
+
+      const res = await fetch("/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      console.log("Uploaded:", data.url);
+    });
+
+    socket.on("newImage", (url) => {
+      const img = document.createElement("img");
+      img.src = url;
+      img.width = 200;
+      gallery.appendChild(img);
+    });
+  </script>
+</body>
+</html>
